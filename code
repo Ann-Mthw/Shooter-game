@@ -1,0 +1,155 @@
+#include<iostream.h>
+#include<iostream.h>
+#include<time.h>
+#include<conio.h>
+#include<stdio.h>
+#include<iomanip.h>
+#include<string.h>
+#include<ctype.h>
+#include<fstream.h>
+#include<process.h>
+#include<stdlib.h>
+//************************************************************************************************
+ int level=1;
+ int attempts=0;
+ int count=0;
+ int pos;
+ char name[20];
+ char capital[15];
+ char country[15];
+//*************************************************************************************************
+struct plyr                               // structure to work with highscore
+{ 
+char name[10];
+ int score;
+}pl;
+struct c                                   // structure to work with textfeed
+{ 
+char cap[15];
+  char ctry[15];
+}x;
+//*************************************************************************************************
+void endgame()                            // Function for ending program
+{
+ void menu();
+ clrscr();
+ char ch;
+ cout<<"\n\n\n\n\n\n\n\n\n\n\n\n\n";
+ cout<<setw(50);
+ cout<<"Are you sure you want to exit ?\n";
+ cout<<setw(50);
+ cout<<"Yes(Y)          No(N)\n";
+ cin>>ch;
+ if(ch=='Y'||ch=='y')
+ exit(0);
+ else if(ch=='N'||ch=='n')
+ menu();
+}
+//*************************************************************************************************
+void about()                              // Function for "about the game"
+{
+  void menu();
+  char ch;
+  clrscr();
+  cout<<"\n\n\n\n\n\n\n\n";
+  cout<<setw(50);
+  cout<<"\t\tThis game has been created by Dharshana , Ann and Sofia.\n\t\tCredits to Ms Dalia and Sumita Arora .\n \t\tJump Jelly Games LLC";
+  cout<<"\n\n\n";
+  cout<<"Go back to menu ?(Y/N)";
+  cin>>ch;
+  if(ch=='Y'||ch=='y')
+  menu();
+  else
+  endgame();
+}
+//*************************************************************************************************
+void disp_score()                         // Function for displaying high score in sorted order
+{
+ int k=0;
+ void menu();
+ char ch;
+ clrscr();
+ ifstream i1;
+ i1.open("highscore.dat", ios::binary);
+ cout<<"\n\n\n\n\n";
+ cout<<setw(20)<<"RANK"<<setw(20)<<"NAME"<<setw(20)<<"SCORE"<<"\n\n";
+ while(i1.read((char*)&pl, sizeof(pl))&&k<10)
+  {
+   k++;
+	cout<<setw(20)<<k<<setw(20)<<pl.name<<setw(20)<<pl.score<<'\n';
+	};
+  i1.close();
+  cout<<"\n\n\n\t\t\t\tGo back to menu ?(Y/N)";
+  cin>>ch;
+  if(ch=='Y'||ch=='y')
+  menu();
+  else
+  endgame();
+}
+
+void insrt_score()                        // Function for inserting score in sorted order into file "highscore.dat"
+{
+ plyr p1;
+ int flg=0;
+ ofstream o1;
+ ifstream i1;
+ strcpy(p1.name,name);
+ p1.score=count*50 + level*10;
+ i1.open("highscore.dat", ios::binary);
+ o1.open("temp.dat", ios::binary);
+ while(i1.read((char*)&pl, sizeof(pl)))
+	{
+	  if (pl.score<=p1.score&&flg!=1)
+			{
+			 o1.write((char*)&p1, sizeof(p1));
+			 flg=1;
+			}
+	  o1.write((char*)&pl, sizeof(pl));
+	}
+ if(flg==0)                               // incase the score is at the end
+	{
+	  o1.write((char*)&p1, sizeof(p1));
+	}
+ i1.close();
+ o1.close();
+ remove("highscore.dat");
+ rename("temp.dat", "highscore.dat");
+ }
+//*************************************************************************************************
+void textfeed(char A[][60])               // to generate the array with jumbled up letters including solution
+{
+int i=0, j, r, t,k=0;
+char textfeed[15]={'T','F','R','U','G','W','C','X','K','D','L','Q','B','E','S'};
+ifstream i1;
+if(level==1)
+	i1.open("level1.dat",ios::binary);
+else if(level==2)
+	i1.open("level2.dat",ios::binary);
+else if(level==3)
+	i1.open("level3.dat",ios::binary);
+i1.seekg(sizeof(c)*attempts);              // to move get pointer to the record depending on attempts in each level
+i1.read((char*)&x,sizeof(x));
+strcpy(country,x.ctry);
+strcpy(capital,x.cap);
+while(capital[i]!='\0')                   //to add the letters of solution to textfeed
+ {
+  textfeed[i++]=capital[i];
+
+ }
+ randomize();                             // to randomize the order of letters
+ for(i=0;i<15;i++)
+ {
+  r=random(15);
+  t=textfeed[i];
+  textfeed[i]=textfeed[r];
+  textfeed[r]=t;
+
+ }                                       //to insert the letters in places of '*' in array A which is passed from play()
+ for(i=0;i<3;i++)
+ {
+   for(j=0;j<60;j++)
+   if (A[i][j]=='*')
+	A[i][j]=textfeed[k++];
+ }
+
+}
